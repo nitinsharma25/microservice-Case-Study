@@ -1,8 +1,10 @@
 package com.ibm.demo.controller;
 
+import com.ibm.demo.dto.CustomerDto;
 import com.ibm.demo.dto.OrderDto;
 import com.ibm.demo.exception.CustomerNotFoundException;
 import com.ibm.demo.exception.ErrorDetails;
+import com.ibm.demo.service.OrderCircuitBreakerService;
 import com.ibm.demo.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,24 +24,29 @@ public class OrderController {
     @Autowired
     OrderService orderService;
 
+    @Autowired
+    OrderCircuitBreakerService orderCircuitBreakerService;
+
 
 
     @PostMapping("/create")
     public OrderDto createCustomer(@RequestBody OrderDto orderDto){
+       /* String custId = orderCircuitBreakerService.getCustomerById(orderDto.getCustid());
+        System.out.println("CustId in controller "+custId);*/
         return orderService.createOrder(orderDto);
     }
 
     @GetMapping("{id}")
     public String getCustomerById(@PathVariable("id") String custId){
-        String customerId = orderService.getCustomerById(custId);
-        return customerId;
+        CustomerDto customerDto = orderCircuitBreakerService.getCustomerById(custId);
+        return customerDto.getId();
     }
 
     @GetMapping("/getByItemName/{name}")
     public String getItemByName(@PathVariable("name") String name){
         //  APIResponseDto apiResponseDto = employeeService.getEmployeeById(employeeId);
         // return new ResponseEntity<>(apiResponseDto, HttpStatus.OK);
-        String itemName = orderService.getItemByName(name);
+        String itemName = orderCircuitBreakerService.getItemByName(name);
         return itemName;
     }
 

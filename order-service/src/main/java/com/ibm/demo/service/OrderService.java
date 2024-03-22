@@ -48,43 +48,53 @@ public class OrderService {
     @Autowired
     OrderLineItemRepository orderLineItemRepository;
 
-
-    @Autowired
-    private WebClient webClient;
+   @Autowired
+   OrderCircuitBreakerService orderCircuitBreakerService;
 
     @Autowired
     private KafkaTemplate<String, OrderDto> kafkaTemplate;
 
 
+    public OrderDto createOrder(OrderDto orderDto) {
+        CustomerDto customerDto =orderCircuitBreakerService.getCustomerById(orderDto.getCustid());
 
-    public OrderDto createOrder(OrderDto orderDto){
-        getCustomerById(orderDto.getCustid());
+      // String customerId = custId.orElseThrow();
+        if(customerDto.getId().equalsIgnoreCase("Customer Service is temprory down")){
+            OrderDto orderDto1 = new OrderDto();
+            orderDto1.setOrderdesc("we can not create order at these moment because our Customer Service is temprory down");
+            return orderDto1;
+        }
         Order toSaveOrder = OrderMapper.mapToOrder(orderDto);
         Order savedOrder = orderRepository.save(toSaveOrder);
         String order_id = savedOrder.getId();
         List<String> items = orderDto.getItemList();
         int itemCount = 0;
-        String itemNamestoSave="";
-        String itemsNames ="";
-        for (String item:items){
-          String itemName = getItemByName(item);
-            if(itemName.equalsIgnoreCase(item)) {
+        String itemNamestoSave = "";
+        String itemsNames = "";
+        for (String item : items) {
+            String itemName = orderCircuitBreakerService.getItemByName(item);
+            if(itemName.equalsIgnoreCase("Item Service is temprory down")){
+                OrderDto orderDto1 = new OrderDto();
+                orderDto1.setOrderdesc("we can not create order at these moment because our Item Service is temprory down");
+                return orderDto1;
+            }
+            if (itemName.equalsIgnoreCase(item)) {
                 itemsNames = itemsNames + "," + item;
                 itemCount++;
             }
 
 
         }
-        LOGGER.info("itemNamestoSave {} ",itemsNames);
+        LOGGER.info("itemNamestoSave {} ", itemsNames);
         OrderLineItem orderLineItem = new OrderLineItem();
-        orderLineItem.setItemname(itemsNames.replaceFirst(",",""));
+        orderLineItem.setItemname(itemsNames.replaceFirst(",", ""));
         orderLineItem.setOrderid(order_id);
         orderLineItem.setItemquantity(itemCount);
         orderLineItemRepository.save(orderLineItem);
         OrderDto savedOrderDto = OrderMapper.mapToOrderDto(savedOrder);
-        kafkaTemplate.send(topicJsonName,savedOrderDto);
+        kafkaTemplate.send(topicJsonName, savedOrderDto);
 
-        LOGGER.info(String.format("Message sent -> %s",savedOrderDto));
+        LOGGER.info(String.format("Message sent -> %s", savedOrderDto));
 
         return savedOrderDto;
     }
@@ -123,76 +133,5 @@ public class OrderService {
     }
 */
 
-    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultItem")
-    public String getItemByName(String name){
-        LOGGER.info("name is {} ",name);
 
-        ItemDto itemDto = webClient.get().uri("http://localhost:8082/api/item/items/"+name)
-                .retrieve()
-                .onStatus(httpStatusCode -> httpStatusCode.is4xxClientError(),error -> Mono.error(new ItemNotFoundException("Item with","name ",name)))
-                .bodyToMono(ItemDto.class)
-                .block();
-        //Optional<ItemDto> ops = Optional.of()
-        String ss = Optional.of(itemDto.getName()).orElseThrow(  ()-> new ItemNotFoundException("Item ","name",itemDto.getName()));
-        return ss;
-    }
-    public String getDefaultItem(String name,Exception exception) {
-
-        if(exception instanceof IndexOutOfBoundsException){
-            List<ItemDto> itemDtoList = new ArrayList<>();
-            ItemDto itemDto = new ItemDto();
-            itemDto.setName("Item with name "+name+" Not Available");
-            return itemDto.getName();
-        }else{
-            ItemDto defaultItemDto = new ItemDto();
-            defaultItemDto.setName("Item Service is temprory down");
-            //  CustomerDto defaultCustomerDto = new CustomerDto(custId,"default first name","default last name","default@gmail.com");
-            return defaultItemDto.getName();
-
-        }
-
-
-
-    }
-
-
-    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultCustomerId")
-    public String getCustomerById(String custId){
-        CustomerDto customerDto = webClient.get().uri("http://localhost:8081/api/customer/getCustomerById/"+custId)
-                .retrieve()
-                .onStatus(httpStatusCode -> httpStatusCode.is4xxClientError(),error -> Mono.error(new CustomerNotFoundException("Customer with","id ",custId)))
-                .bodyToMono(CustomerDto.class)
-                .block();
-        return customerDto.getId();
-    }
-
-    public String getDefaultCustomerId(String custId,Exception exception) {
-        LOGGER.info("excetion type is {} ",exception);
-        LOGGER.info("custId is {} ",custId);
-
-        if(exception instanceof CustomerNotFoundException){
-                    CustomerDto defaultCustomerDto = new CustomerDto();
-                    defaultCustomerDto.setId("Customer with id "+custId+" not available");
-                    return defaultCustomerDto.getId();
-        }else {
-                    CustomerDto defaultCustomerDto = new CustomerDto();
-                    defaultCustomerDto.setId("Customer Service is temprory down");
-                    defaultCustomerDto.setFirstname("defaultFirstName");
-                    defaultCustomerDto.setLastname("defaultLastName");
-                    defaultCustomerDto.setEmail("default@gmail.com");
-                    //  CustomerDto defaultCustomerDto = new CustomerDto(custId,"default first name","default last name","default@gmail.com");
-                    return defaultCustomerDto.getId();
-        }
-
-    }
-
-    @ExceptionHandler(ItemNotFoundException.class)
-    public ResponseEntity<ErrorDetails> handleCustomerNotFoundException(ItemNotFoundException exception, WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),
-                exception.getMessage(),
-                webRequest.getDescription(false),
-                "Item Not Found"
-        );
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
-    }
 }

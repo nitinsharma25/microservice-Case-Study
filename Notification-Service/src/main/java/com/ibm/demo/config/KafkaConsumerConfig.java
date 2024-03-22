@@ -19,7 +19,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig
 {
-	public static final String GROUP_ID = "Group1000";
+	public static final String GROUP_ID = "myGroup";
 
 	@Bean
 	public ConsumerFactory<String, OrderDto> consumerFactory()

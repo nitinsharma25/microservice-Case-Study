@@ -148,7 +148,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     public CustomerDto getDefaultCustomer(String custId, Exception exception) {
-        LOGGER.info("excetion type is {} ", exception);
+       // LOGGER.info("excetion type is {} ", exception);
         LOGGER.info("custId is {} ", custId);
 
         if (exception instanceof CustomerNotFoundException) {
