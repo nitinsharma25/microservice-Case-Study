@@ -20,4 +20,5 @@ public class Item {
 
     private String description;
     private double price;
+    private String image;
 }

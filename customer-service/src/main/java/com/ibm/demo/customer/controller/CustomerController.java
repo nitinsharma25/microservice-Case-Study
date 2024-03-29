@@ -14,6 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
@@ -48,6 +49,11 @@ public class CustomerController {
     @GetMapping("/customers/{name}")
     public List<CustomerDto> findCustomerById(@PathVariable String name){
       return   customerService.findByCustomerName(name);
+    }
+
+    @GetMapping("getByEmail/{email}")
+    public CustomerDto findCustomerByEmailId(@PathVariable String email){
+        return   customerService.getCustomerByEmail(email);
     }
 
     @ExceptionHandler(CustomerNotFoundException.class)

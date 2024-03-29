@@ -10,7 +10,8 @@ public class CustomerMapper {
                 customer.getId(),
                 customer.getFirstname(),
                 customer.getLastname(),
-                customer.getEmail()
+                customer.getEmail(),
+              customer.getPassword()
               //  employee.getDepartmentCode()
                 //   employee.getOrganizationCode()
         );
@@ -22,9 +23,8 @@ public class CustomerMapper {
                 customerDto.getId(),
                 customerDto.getFirstname(),
                 customerDto.getLastname(),
-                customerDto.getEmail()
-               // employeeDto.getDepartmentCode()
-                // employeeDto.getOrganizationCode()
+                customerDto.getEmail(),
+               customerDto.getPassword()
         );
         return employee;
     }

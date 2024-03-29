@@ -39,6 +39,14 @@ public class CustomerService {
         return customerDtoResponse;
     }
 
+    public CustomerDto getCustomerByEmail(String email){
+        Customer customer = customerRepository.findByEmail(email).orElseThrow(
+                ()-> new CustomerNotFoundException("Customer","email",email)
+        );
+        CustomerDto customerDtoResponse = CustomerMapper.mapToCustomerDto(customer);
+        return customerDtoResponse;
+    }
+
     public void deleteCustomerById(String id){
          customerRepository.deleteById(id);
     }

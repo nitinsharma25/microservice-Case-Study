@@ -9,6 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface ItemRepository extends MongoRepository<Item,String> {
-   // List<Item> findByName(String name);
     Optional<Item> findByName(String name);
 }

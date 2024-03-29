@@ -22,7 +22,7 @@ public class Customer {
     @Field("last_name")
     private String lastname;
     private String email;
-
+    private String password;
    /* public Customer() {
 
     }

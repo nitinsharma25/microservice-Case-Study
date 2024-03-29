@@ -9,7 +9,8 @@ public class ItemMapper {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getPrice()
+                item.getPrice(),
+                item.getImage()
                  );
         return itemDto;
     }
@@ -19,8 +20,8 @@ public class ItemMapper {
                 itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
-                itemDto.getPrice()
-
+                itemDto.getPrice(),
+                itemDto.getImage()
         );
         return item;
     }

@@ -86,6 +86,8 @@ public class OrderService {
 
         }
         LOGGER.info("itemNamestoSave {} ", itemsNames);
+        LOGGER.info("item count {} ", itemCount);
+
         OrderLineItem orderLineItem = new OrderLineItem();
         orderLineItem.setItemname(itemsNames.replaceFirst(",", ""));
         orderLineItem.setOrderid(order_id);
