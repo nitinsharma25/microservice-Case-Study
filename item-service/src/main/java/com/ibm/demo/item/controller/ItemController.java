@@ -45,6 +45,7 @@ public class ItemController {
     @DeleteMapping("/deleteItemById/{id}")
     public String deleteItemById(@PathVariable String id){
          itemService.deleteItemById(id);
+        System.out.println("Delete Success for id "+id);
          return "delete Success";
     }
     /*@GetMapping("/items/{name}")

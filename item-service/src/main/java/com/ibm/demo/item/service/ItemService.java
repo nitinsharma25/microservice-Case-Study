@@ -5,6 +5,7 @@ import com.ibm.demo.item.entity.Item;
 import com.ibm.demo.item.exception.ItemNotFoundException;
 import com.ibm.demo.item.mapper.ItemMapper;
 import com.ibm.demo.item.reository.ItemRepository;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +15,10 @@ import java.util.List;
 @Service
 public class ItemService {
 
+
     @Autowired
     ItemRepository itemRepository;
+
 
     public ItemDto createItem(ItemDto itemDto){
         Item mappedItem = ItemMapper.mapToItem(itemDto);
